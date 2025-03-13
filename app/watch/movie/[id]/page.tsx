@@ -1,4 +1,4 @@
-import { getMovieDetails, getMovieVideos } from "@/lib/tmdb"
+import { getMovieDetails } from "@/lib/tmdb"
 import { notFound } from "next/navigation"
 import VideoPlayer from "@/components/video-player"
 import { Button } from "@/components/ui/button"
@@ -8,10 +8,6 @@ import Link from "next/link"
 export default async function WatchMoviePage({ params }: { params: { id: string } }) {
   try {
     const movie = await getMovieDetails(params.id)
-    const videos = await getMovieVideos(params.id)
-
-    // For demo purposes, we'll use a trailer if available, or a placeholder
-    const videoSource = videos.results.find((v) => v.type === "Trailer")?.key || null
 
     return (
       <div className="bg-black min-h-screen">
@@ -29,7 +25,6 @@ export default async function WatchMoviePage({ params }: { params: { id: string 
             <VideoPlayer
               videoId={params.id}
               title={movie.title}
-              trailerKey={null} // Set to null to use streaming sources instead of trailer
               type="movie"
             />
           </div>

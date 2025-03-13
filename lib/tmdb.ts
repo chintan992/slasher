@@ -85,6 +85,10 @@ export async function getTvEpisodeDetails(tvId: string, seasonNumber: string, ep
   return fetchFromTMDB(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`)
 }
 
+export async function getTvEpisodeVideos(showId: string, seasonNumber: string, episodeNumber: string) {
+  return fetchFromTMDB(`/tv/${showId}/season/${seasonNumber}/episode/${episodeNumber}/videos`)
+}
+
 // Search for movies or TV shows
 export async function searchContent(
   query: string,

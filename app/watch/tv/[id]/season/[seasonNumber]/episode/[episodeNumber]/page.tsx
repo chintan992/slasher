@@ -1,10 +1,29 @@
-import { getTvShowDetails, getTvEpisodeDetails } from "@/lib/tmdb"
+import { getTvShowDetails, getTvEpisodeDetails, getTvEpisodeVideos } from "@/lib/tmdb"
 import { notFound } from "next/navigation"
 import VideoPlayer from "@/components/video-player"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import type { Viewport } from "next"
 import EpisodeSelector from "@/components/episode-selector"
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
+
+interface TvVideo {
+  id: string
+  key: string
+  type: string
+}
+
+interface Season {
+  season_number: number
+  episode_count: number
+}
 
 export default async function WatchTvEpisodePage({
   params,
@@ -18,12 +37,15 @@ export default async function WatchTvEpisodePage({
   try {
     const show = await getTvShowDetails(params.id)
     const episode = await getTvEpisodeDetails(params.id, params.seasonNumber, params.episodeNumber)
+    const videos = await getTvEpisodeVideos(params.id, params.seasonNumber, params.episodeNumber)
+
+    const trailerKey = videos.results.find((v: TvVideo) => v.type === "Trailer")?.key || null
 
     const seasonNum = Number.parseInt(params.seasonNumber)
     const episodeNum = Number.parseInt(params.episodeNumber)
 
     // Calculate next and previous episodes
-    const hasNextEpisode = episodeNum < show.seasons.find((s) => s.season_number === seasonNum)?.episode_count!
+    const hasNextEpisode = episodeNum < show.seasons.find((s: Season) => s.season_number === seasonNum)?.episode_count!
     const hasPrevEpisode = episodeNum > 1 || seasonNum > 1
 
     let nextEpisodeUrl = ""
@@ -38,7 +60,7 @@ export default async function WatchTvEpisodePage({
     if (episodeNum > 1) {
       prevEpisodeUrl = `/watch/tv/${params.id}/season/${seasonNum}/episode/${episodeNum - 1}`
     } else if (seasonNum > 1) {
-      const prevSeasonEpisodeCount = show.seasons.find((s) => s.season_number === seasonNum - 1)?.episode_count || 1
+      const prevSeasonEpisodeCount = show.seasons.find((s: Season) => s.season_number === seasonNum - 1)?.episode_count || 1
       prevEpisodeUrl = `/watch/tv/${params.id}/season/${seasonNum - 1}/episode/${prevSeasonEpisodeCount}`
     }
 
@@ -89,7 +111,6 @@ export default async function WatchTvEpisodePage({
               showId={params.id}
               seasonNumber={params.seasonNumber}
               episodeNumber={params.episodeNumber}
-              trailerKey={null} // Set to null to use streaming sources instead of trailer
             />
           </div>
 
